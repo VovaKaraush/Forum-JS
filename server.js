@@ -1,11 +1,14 @@
-const express = require('express');
-const setupRoutes = require('./functions/routes.js');
-const startdb = require('./functions/database.js');
-const nodemon = require('nodemon')
+import express from 'express';
+import setupRoutes from './routes/routes.js';
+import startdb from './middleware/database.js';
 import cwd from 'node:process';
+import { start } from 'node:repl';
 
 const app = express();
 const port = 8080;
+
+setupRoutes(app);
+startdb();
 
 
 app.listen(port, () => {
