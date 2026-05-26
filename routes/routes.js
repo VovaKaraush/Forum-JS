@@ -1,6 +1,11 @@
 import path from 'path';
 import express from 'express';
 import cwd from 'node:process';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { db } from '../middleware/database.js';
+
+const JWT_SECRET = 'your-secret-key'; // À changer en variable d'environnement en production
 
 
 function setupPostRoutes(app) {
@@ -47,7 +52,6 @@ function setupPostRoutes(app) {
                 {
                     id: user.id,
                     username: user.name,
-                    email: user.email
                 },
                 JWT_SECRET,
                 { expiresIn: '24h' }
@@ -60,7 +64,6 @@ function setupPostRoutes(app) {
                 user: {
                     id: user.id,
                     username: user.name,
-                    email: user.email
                 }
             });
 
@@ -69,7 +72,7 @@ function setupPostRoutes(app) {
 
             res.status(500).json({
                 success: false,
-                message: 'Erreur serveur'
+                message: 'Erreur serveur de login'
             });
         }
     });
@@ -79,13 +82,12 @@ function setupPostRoutes(app) {
         try {
             const {
                 username,
-                email,
                 password,
-                confirmPassword
+                confirmPassword,
             } = req.body;
 
             // Validation
-            if (!username || !email || !password || !confirmPassword) {
+            if (!username || !password || !confirmPassword) {
                 return res.status(400).json({
                     success: false,
                     message: 'Tous les champs sont requis'
@@ -118,32 +120,19 @@ function setupPostRoutes(app) {
                 });
             }
 
-            // Check if email already exists
-            const existingEmail = db.prepare(
-                'SELECT * FROM users WHERE email = ?'
-            ).get(email);
-
-            if (existingEmail) {
-                return res.status(409).json({
-                    success: false,
-                    message: 'Cet email est déjà utilisé'
-                });
-            }
-
             // Hash password
             const hashedPassword = bcrypt.hashSync(password, 10);
 
             // Create user
             const result = db.prepare(
-                'INSERT INTO users (name, email, password) VALUES (?, ?, ?)'
-            ).run(username, email, hashedPassword);
+                'INSERT INTO users (name, password) VALUES (?, ?)'
+            ).run(username, hashedPassword);
 
             // Generate JWT token
             const token = jwt.sign(
                 {
                     id: result.lastInsertRowid,
                     username,
-                    email
                 },
                 JWT_SECRET,
                 { expiresIn: '24h' }
@@ -156,7 +145,6 @@ function setupPostRoutes(app) {
                 user: {
                     id: result.lastInsertRowid,
                     username,
-                    email
                 }
             });
 
@@ -165,7 +153,26 @@ function setupPostRoutes(app) {
 
             res.status(500).json({
                 success: false,
-                message: 'Erreur serveur'
+                message: 'Erreur serveur d\'inscription'
+            });
+        }
+    });
+
+    //POST route for a like
+    app.post('/api/like', (req, res) => {
+        try {
+            const {
+                id_post,
+                id_user,
+            } = req.body;
+
+
+        } catch (error) {
+            console.error("Erreur lors de la mise du like:", error);
+
+            res.status(500).json({
+                success: false,
+                message: 'erreur serveur'
             });
         }
     });
@@ -178,8 +185,8 @@ function setupRoutes(app) {
 
     // Get the Home Page
     app.get('/', (req, res) => {
-        console.log("Root requested");
         res.sendFile(path.join(process.cwd(), 'public', 'login.html'));
+        console.log("Root requested");
     });
 
 };

@@ -7,6 +7,9 @@ import { start } from 'node:repl';
 const app = express();
 const port = 8080;
 
+// Middleware pour parser le JSON
+app.use(express.json());
+
 setupRoutes(app);
 startdb();
 
