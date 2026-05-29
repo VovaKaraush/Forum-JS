@@ -19,6 +19,7 @@
 
   <form id="signUpForm">
     <input type="text" id="signUpUsername" placeholder="Username" required>
+    <input type="text" id="signUpEmail" placeholder="Email" required>
     <input type="password" id="signUpPassword" placeholder="Password" required>
     <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
     <button type="submit">Register</button>
@@ -87,10 +88,11 @@
       
       // STEP 2: Get the values from the form
       const username = document.getElementById('signUpUsername').value;
+      const email = document.getElementById('signUpEmail').value;
       const password = document.getElementById('signUpPassword').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
       
-      console.log('🌐 Browser: Preparing to send:', { username, password, confirmPassword });
+      console.log('🌐 Browser: Preparing to send:', { username, email, password, confirmPassword });
       
       // STEP 3: Send HTTP POST request to backend
       try {
@@ -101,7 +103,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ username, password, confirmPassword })
+          body: JSON.stringify({ username, email, password, confirmPassword })
         });
         
         console.log('🌐 Browser: Got response from server!');

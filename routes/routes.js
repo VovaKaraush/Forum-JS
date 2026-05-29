@@ -82,12 +82,13 @@ function setupPostRoutes(app) {
         try {
             const {
                 username,
+                email,
                 password,
                 confirmPassword,
             } = req.body;
 
             // Validation
-            if (!username || !password || !confirmPassword) {
+            if (!username || !password || !email || !confirmPassword) {
                 return res.status(400).json({
                     success: false,
                     message: 'Tous les champs sont requis'
@@ -108,6 +109,17 @@ function setupPostRoutes(app) {
                 });
             }
 
+            const existingEmail = db.prepare(
+                'SELECT * FROM users WHERE email = ?'
+            ).get(email);
+
+            if (existingEmail){
+                return res.status(409).json({
+                    success: false,
+                    message: 'Ce mail est déjà utilisé'
+                });
+            }
+
             // Check if username already exists
             const existingUser = db.prepare(
                 'SELECT * FROM users WHERE name = ?'
@@ -125,8 +137,8 @@ function setupPostRoutes(app) {
 
             // Create user
             const result = db.prepare(
-                'INSERT INTO users (name, password) VALUES (?, ?)'
-            ).run(username, hashedPassword);
+                'INSERT INTO users (name, email, password) VALUES (?, ?, ?)'
+            ).run(username, email, hashedPassword);
 
             // Generate JWT token
             const token = jwt.sign(
