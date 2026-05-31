@@ -37,10 +37,11 @@ function setupPostRoutes(app) {
             // Check password
             const passwordMatch = bcrypt.compareSync(
                 password,
-                user.password
+                user.password_hash
             );
 
             if (!passwordMatch) {
+                console.log("User", user.name, "not connected, bad password.")
                 return res.status(401).json({
                     success: false,
                     message: 'Pseudo ou mot de passe incorrect'
@@ -67,7 +68,10 @@ function setupPostRoutes(app) {
                 }
             });
 
+            console.log("User", user.name, "sucessfully connected!")
+
         } catch (error) {
+            
             console.error('Erreur lors de la connexion:', error);
 
             res.status(500).json({
@@ -89,6 +93,7 @@ function setupPostRoutes(app) {
 
             // Validation
             if (!username || !password || !email || !confirmPassword) {
+                console.log("One of the fields is empty")
                 return res.status(400).json({
                     success: false,
                     message: 'Tous les champs sont requis'
@@ -96,6 +101,7 @@ function setupPostRoutes(app) {
             }
 
             if (password !== confirmPassword) {
+                console.log("not corresponding password for account creation of account", username)
                 return res.status(400).json({
                     success: false,
                     message: 'Les mots de passe ne correspondent pas'
@@ -114,6 +120,7 @@ function setupPostRoutes(app) {
             ).get(email);
 
             if (existingEmail){
+                console.log("Email", existingEmail.email, "exists")
                 return res.status(409).json({
                     success: false,
                     message: 'Ce mail est déjà utilisé'
@@ -126,6 +133,7 @@ function setupPostRoutes(app) {
             ).get(username);
 
             if (existingUser) {
+                console.log("User", existingUser.name, "exists")
                 return res.status(409).json({
                     success: false,
                     message: 'Ce pseudo est déjà utilisé'
@@ -137,7 +145,7 @@ function setupPostRoutes(app) {
 
             // Create user
             const result = db.prepare(
-                'INSERT INTO users (name, email, password) VALUES (?, ?, ?)'
+                'INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)'
             ).run(username, email, hashedPassword);
 
             // Generate JWT token
@@ -160,9 +168,9 @@ function setupPostRoutes(app) {
                 }
             });
 
+
         } catch (error) {
             console.error("Erreur lors de l'inscription:", error);
-
             res.status(500).json({
                 success: false,
                 message: 'Erreur serveur d\'inscription'
@@ -175,8 +183,9 @@ function setupPostRoutes(app) {
         try {
             const {
                 id_post,
-                id_user,
+                username,
             } = req.body;
+
 
 
         } catch (error) {
