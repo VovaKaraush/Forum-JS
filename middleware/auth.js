@@ -1,4 +1,7 @@
 import jwt from 'jsonwebtoken';
+import { createRequire } from "module"; //line added to support require for jwt
+const require = createRequire(import.meta.url); //line added to support require for jwt at line
+require("dotenv").config(); //this require
 
 const JWT_SECRET = process.env.JWT_AUTH_KEY;
 

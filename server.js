@@ -1,3 +1,6 @@
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+require('dotenv').config();
 import express from 'express';
 import setupRoutes from './routes/routes.js';
 import startdb from './middleware/database.js';

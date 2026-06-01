@@ -33,10 +33,12 @@
     <input type="number" id="postId" placeholder="ID of liked post">
     <button type="submit">Like a post</button>    
   </form>
-  
+
+  <div id="Like Message"></div>
   
 
   <script>
+
     //login form
     // STEP 1: Listen for form submission
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -141,15 +143,31 @@
     });
 
     document.getElementById('sendLike').addEventListener('submit', async (e) => {
-
-      e.preventDefault();
+      e.preventDefault(); // prevents page reset
       
       // STEP 2: Get the values from the form
       const postId = document.getElementById('postId').value;
-      const token = document.cookie.token;
-      console.log('🌐 Browser: User clicked wanted to like post with this number :\"', postId,'\"for id');
-      
-      
+      const token = getCookie('token'); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Mais la valeur nest jamais assignée ici, d'ou le probleme(le return cote backend est nul)!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+      console.log('[DEV_LOG]🌐 Browser: User clicked wanted to like post with this number :\"', postId,'\"for id');
+      console.log('[DEV_LOG]🌐 Browser: preparing to check jwt token for validity')
+      console.log('sending token:', token, 'and postID :', postId)
+      try{
+        
+        console.log('[DEV_LOG]🌐 Browser: Sending request to /api/like...');
+
+        const response = await fetch('/api/like', { // !!!!!!!!!!!!!!!!! L'envoi se passe ici!!!!!!!!!!!!!!!!!!!!!!!!!!!          note 1
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ postId, token })
+        });
+
+
+      } catch(error) {
+        console.log("[DEV_LOG]🌐 Browser: error happened when user tried to like post", error)
+      }
       
     });
   </script>

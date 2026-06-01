@@ -197,8 +197,8 @@ function setupPostRoutes(app) {
                 token
             } = req.body;
 
-            authenticateToken(req)
-
+            const verified = jwt.verify(token, JWT_SECRET);
+            console.log(verified)
 
         } catch (error) {
             console.error("Erreur lors de la mise du like:", error);
