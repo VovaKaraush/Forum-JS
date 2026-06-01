@@ -3,9 +3,13 @@ import express from 'express';
 import cwd from 'node:process';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { createRequire } from "module"; //line added to support require for jwt
+const require = createRequire(import.meta.url); //line added to support require for jwt at line
+require("dotenv").config(); //this require
 import { db } from '../middleware/database.js';
+import authenticateToken from '../middleware/auth.js';
 
-const JWT_SECRET = 'your-secret-key'; // À changer en variable d'environnement en production
+const JWT_SECRET = process.env.JWT_AUTH_KEY; // À changer en variable d'environnement en production
 
 
 function setupPostRoutes(app) {
@@ -47,20 +51,23 @@ function setupPostRoutes(app) {
                     message: 'Pseudo ou mot de passe incorrect'
                 });
             }
+            
+            console.log(user, "user check for token")
 
             // Generate JWT token
             const token = jwt.sign(
                 {
                     id: user.id,
                     username: user.name,
+                    email:user.email
                 },
                 JWT_SECRET,
-                { expiresIn: '24h' }
+                { expiresIn: '4h' }
             );
 
             res.json({
                 success: true,
-                message: 'Connexion réussie',
+                message: 'Connexion réussie, cookies enregistrés!',
                 token,
                 user: {
                     id: user.id,
@@ -149,14 +156,17 @@ function setupPostRoutes(app) {
             ).run(username, email, hashedPassword);
 
             // Generate JWT token
-            const token = jwt.sign(
+            /*const token = jwt.sign(
                 {
                     id: result.lastInsertRowid,
                     username,
+                    email
                 },
                 JWT_SECRET,
                 { expiresIn: '24h' }
-            );
+            );*/ 
+            // !!!!!!!! THE TOKEN WILL NOT BE GENERATED ON ACCOUNT CREATION,!!!!!!!!!!!
+            // !!!!!!!!!!!!!!   THE USER HAS TO LOG BY HIMSELF   !!!!!!!!!!!!!!!!!!!!!!
 
             res.status(201).json({
                 success: true,
@@ -184,8 +194,10 @@ function setupPostRoutes(app) {
             const {
                 id_post,
                 username,
+                token
             } = req.body;
 
+            authenticateToken(req)
 
 
         } catch (error) {
