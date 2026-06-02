@@ -1,58 +1,76 @@
-# 3Chan — Maquette Forum
+# 3Chan - Forum
 
-Maquette d'interface d'un forum communautaire inspiré de Reddit, réalisée en HTML/CSS pur.
+Forum communautaire React + Node.js/Express + SQLite.
 
-## Aperçu
-
-**3Chan** est une maquette statique d'un forum de type Reddit. Elle présente une interface complète avec barre de navigation, sidebar, fil de posts et règles du forum.
-
-## Structure du projet
+## Structure
 
 ```
 Forum-JS/
-├── Menu.html     # Page principale du forum
-├── style.css     # Feuille de styles complète
-└── README.md
+├── src/                  # Frontend React (Vite)
+│   ├── App.jsx           # App principale + toutes les pages
+│   ├── api.js            # Helpers fetch vers le backend
+│   ├── main.jsx          # Point d'entree React
+│   └── style.css         # Styles globaux
+├── backend/              # Backend Express + SQLite
+│   ├── server.js
+│   ├── middleware/
+│   │   ├── database.js   # Init BDD + migrations + seed
+│   │   └── auth.js       # Session par cookie
+│   ├── routes/
+│   │   └── routes.js     # Toutes les routes API
+│   └── package.json
+├── index.html            # Point d'entree Vite
+└── vite.config.js        # Proxy /api -> backend:3001
 ```
 
-## Fonctionnalités UI
+## Lancement en dev
 
-- **Topbar** — logo, barre de recherche, boutons Connexion / Inscription
-- **Sidebar** — carte de bienvenue, navigation (Accueil, Populaire, Nouveautés…)
-- **Fil de contenu** — zone de création de post, onglets (Hot / New / Top / Commentés)
-- **À propos du forum** — statistiques membres et en ligne
-- **Règles** — liste des règles de la communauté
-- **Responsive** — mise en page adaptée mobile (< 900 px et < 600 px)
-
-## Technologies
-
-| Technologie | Usage |
-|-------------|-------|
-| HTML5 | Structure sémantique |
-| CSS3 | Mise en page Grid/Flexbox, responsive design |
-
-## Lancer le projet
-
-Ouvrir directement `Menu.html` dans un navigateur — aucun serveur ni dépendance requis.
+### 1. Backend
 
 ```bash
-# Exemple avec VS Code Live Server
-# Clic droit sur Menu.html → "Open with Live Server"
+cd backend
+npm install
+npm start
 ```
 
-## Palette de couleurs
+Le backend tourne sur http://localhost:3001
 
-| Rôle | Couleur |
-|------|---------|
-| Accent principal | `#ff4500` (orange-rouge) |
-| Lien / bleu forum | `#0079d3` |
-| Fond de page | `#dce3ea` |
-| Cartes | `#ffffff` |
+### 2. Frontend (autre terminal)
 
-## Prochaines étapes envisagées
+```bash
+npm install
+npm run dev
+```
 
-- [ ] Ajouter des posts dynamiques via JavaScript
-- [ ] Système de vote (upvote / downvote) fonctionnel
-- [ ] Page de détail d'un post avec commentaires
-- [ ] Authentification simulée (connexion / inscription)
-- [ ] Mode sombre
+L'app est disponible sur http://localhost:5173
+
+## Fonctionnalites
+
+- Inscription / Connexion / Deconnexion (session cookie, une session par user)
+- Mots de passe hashe (bcrypt)
+- Posts avec une ou plusieurs categories + image optionnelle (JPEG/PNG/GIF, max 20 Mo)
+- Modifier / supprimer ses propres posts
+- Commentaires (CRUD)
+- Like / Dislike sur posts et commentaires (toggle)
+- Filtrage : par categorie, mes posts, mes likes
+- Visiteurs non connectes peuvent lire mais pas poster/commenter/liker
+- Gestion des erreurs HTTP (400, 401, 403, 404, 500)
+
+## API Backend (port 3001)
+
+| Methode | Route | Auth | Description |
+|--------|-------|------|-------------|
+| GET | /api/me | - | Utilisateur courant |
+| POST | /api/register | - | Inscription |
+| POST | /api/login | - | Connexion |
+| POST | /api/logout | - | Deconnexion |
+| GET | /api/categories | - | Liste categories |
+| GET | /api/posts | - | Liste posts (filtres: category/mine/liked/page) |
+| GET | /api/posts/:id | - | Post + commentaires |
+| POST | /api/posts | oui | Creer un post |
+| PUT | /api/posts/:id | oui | Modifier son post |
+| DELETE | /api/posts/:id | oui | Supprimer son post |
+| POST | /api/comments | oui | Commenter |
+| PUT | /api/comments/:id | oui | Modifier son commentaire |
+| DELETE | /api/comments/:id | oui | Supprimer son commentaire |
+| POST | /api/like | oui | Like/dislike (toggle) |
