@@ -196,6 +196,7 @@ function setupPostRoutes(app) {
                 username,
                 token
             } = req.body;
+            console.log(token)
 
             const verified = jwt.verify(token, JWT_SECRET);
             console.log(verified)
