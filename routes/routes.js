@@ -8,6 +8,7 @@ const require = createRequire(import.meta.url); //line added to support require 
 require("dotenv").config(); //this require
 import { db } from '../middleware/database.js';
 import authenticateToken from '../middleware/auth.js';
+import userLiked from '../middleware/likes.js'
 
 const JWT_SECRET = process.env.JWT_AUTH_KEY; // À changer en variable d'environnement en production
 
@@ -15,6 +16,7 @@ const JWT_SECRET = process.env.JWT_AUTH_KEY; // À changer en variable d'environ
 function setupPostRoutes(app) {
     // POST Login route
     app.post('/api/login', (req, res) => {
+        console.log('route login running')
         try {
             const { username, password } = req.body;
 
@@ -62,7 +64,7 @@ function setupPostRoutes(app) {
                     email:user.email
                 },
                 JWT_SECRET,
-                { expiresIn: '4h' }
+                { expiresIn: '2h' }
             );
 
             res.json({
@@ -75,6 +77,7 @@ function setupPostRoutes(app) {
                 }
             });
 
+            console.log('this is the token:', token)
             console.log("User", user.name, "sucessfully connected!")
 
         } catch (error) {
@@ -90,6 +93,7 @@ function setupPostRoutes(app) {
 
     // POST Register route
     app.post('/api/register', (req, res) => {
+        console.log('route register running');
         try {
             const {
                 username,
@@ -163,7 +167,7 @@ function setupPostRoutes(app) {
                     email
                 },
                 JWT_SECRET,
-                { expiresIn: '24h' }
+                { expiresIn: '4h' }
             );*/ 
             // !!!!!!!! THE TOKEN WILL NOT BE GENERATED ON ACCOUNT CREATION,!!!!!!!!!!!
             // !!!!!!!!!!!!!!   THE USER HAS TO LOG BY HIMSELF   !!!!!!!!!!!!!!!!!!!!!!
@@ -190,24 +194,60 @@ function setupPostRoutes(app) {
 
     //POST route for a like
     app.post('/api/like', (req, res) => {
+        console.log('route like running');
         try {
             const {
                 id_post,
                 username,
                 token
             } = req.body;
-            console.log(token)
 
-            const verified = jwt.verify(token, JWT_SECRET);
-            console.log(verified)
+            console.log(token);
+            const [tokenCheck, verified] = authenticateToken(token);
+
+            if (!tokenCheck){
+                throw new Error("The token is either invalid or absent!")
+                res.status(403).json({
+                    success: false,
+                    message: 'Votre token de session est invalide, Connectez vous a nouveau sur votre compte!'
+                });
+            }
+
+            console.log("token validated :", verified);
+            
+            const like = userLiked(verified.id, id_post);
+
+            if (like){
+                console.log('like mis');
+                res.status(201).json({
+                    success: true,
+                    message: 'like mis avec success',
+                });
+            } else if (!like){
+                console.log('like enleve');
+                res.status(201).json({
+                    success: true,
+                    message: 'like enlevé avec success',
+                });
+            }
 
         } catch (error) {
-            console.error("Erreur lors de la mise du like:", error);
+            if (error.message == "The token is either invalid or absent!") {
+                console.error("Token invalide: ", error)
+                res.status(403).json({
+                    success: false,
+                    message: 'Your token is not valid, please relogin into your account to fix the problem.'
+                });
+            } else {
+                console.error("Erreur lors de la mise du like:", error);
 
-            res.status(500).json({
-                success: false,
-                message: 'erreur serveur'
-            });
+                res.status(500).json({
+                    success: false,
+                    message: 'Erreur serveur'
+                });
+            }
+
+            
         }
     });
 };

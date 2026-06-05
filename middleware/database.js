@@ -39,7 +39,7 @@ function startdb() {
         CREATE TABLE IF NOT EXISTS likes (
             id         INTEGER PRIMARY KEY AUTOINCREMENT,                       -- Identifiant unique
             user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE, -- Utilisateur qui like
-            target_id  INTEGER NOT NULL REFERENCES posts(id),                                        -- ID du post ou commentaire liké
+            target_id  INTEGER NOT NULL REFERENCES posts(id),                   -- ID du post ou commentaire liké
             created_at TEXT    NOT NULL DEFAULT (datetime('now')),              -- Date du like
             UNIQUE (user_id, target_id)                                         -- Un like par cible par utilisateur
         );

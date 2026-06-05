@@ -34,7 +34,7 @@
     <button type="submit">Like a post</button>    
   </form>
 
-  <div id="Like Message"></div>
+  <div id="likeMessage"></div>
   
 
   <script>
@@ -170,6 +170,17 @@
           body: JSON.stringify({ postId, token })
         });
 
+        const data = await response.json();
+
+        console.log('[DEV_LOG]🌐 Browser: Response data:', data);
+
+        if (data.success) {
+          document.getElementById('likeMessage').textContent = '✅ ' + data.message;
+          document.getElementById('likeMessage').style.color = 'green';
+        } else {
+          document.getElementById('likeMessage').textContent = '❌ ' + data.message;
+          document.getElementById('likeMessage').style.color = 'red';
+        }
 
       } catch(error) {
         console.log("[DEV_LOG]🌐 Browser: error happened when user tried to like post", error)
